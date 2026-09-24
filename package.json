@@ -1,0 +1,5 @@
+{
+  "name": "demand-midweek-review",
+  "private": true,
+  "engines": { "node": ">=18" }
+}

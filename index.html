@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Demand Midweek Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f4f6f5;--surface:#ffffff;--surface-2:#eef2f0;--ink:#101a17;--ink-2:#4a5752;--ink-3:#77837e;
+  --line:#dde4e1;--grid:#e9eeec;--accent:#0b6b5c;--accent-soft:#dcefe9;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;
+  --pos:#2a78d6;--neg:#e34948;--mid:#f0efec;
+  --good:#0ca30c;--warn:#fab219;--crit:#d03b3b;
+  --good-bg:#e5f4e5;--warn-bg:#fdf1d6;--crit-bg:#fbe6e6;--neutral-bg:#eef1f0;
+  --shadow:0 1px 2px rgba(16,26,23,.05),0 4px 16px rgba(16,26,23,.04);
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;--bg:#0e1312;--surface:#151b19;--surface-2:#1c2421;--ink:#edf3f0;--ink-2:#a7b4af;--ink-3:#76837e;
+  --line:#28322f;--grid:#212a27;--accent:#45b9a2;--accent-soft:#18332d;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--pos:#3987e5;--neg:#e66767;--mid:#383835;
+  --good-bg:#15301a;--warn-bg:#352a10;--crit-bg:#3a1a1a;--neutral-bg:#212a27;--shadow:none;}}
+:root[data-theme="dark"]{
+  color-scheme:dark;--bg:#0e1312;--surface:#151b19;--surface-2:#1c2421;--ink:#edf3f0;--ink-2:#a7b4af;--ink-3:#76837e;
+  --line:#28322f;--grid:#212a27;--accent:#45b9a2;--accent-soft:#18332d;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--pos:#3987e5;--neg:#e66767;--mid:#383835;
+  --good-bg:#15301a;--warn-bg:#352a10;--crit-bg:#3a1a1a;--neutral-bg:#212a27;--shadow:none;}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;padding-inline:16px;padding-block:0 48px;font-variant-numeric:tabular-nums}
+.wrap{max-width:1240px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 0;margin-inline:-16px;padding-inline:16px;border-bottom:1px solid var(--line)}
+.toprow{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;justify-content:space-between}
+.brand h1{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.brand p{margin:2px 0 0;color:var(--ink-3);font-size:12.5px}
+.weekpick{display:flex;align-items:center;gap:6px}
+.weekpick .wklab{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-right:4px}
+.weekpick #wkbtn,.weekpick button{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;height:34px;padding:0 10px}
+.wk{position:relative}
+.weekpick #wkbtn{width:auto;min-width:132px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 10px;font-weight:500}
+.weekpick #wkbtn .car{color:var(--ink-3);font-size:11px}
+.wkmenu{position:absolute;top:calc(100% + 6px);right:0;width:220px;max-height:min(360px,60vh);overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.14);padding:6px;z-index:20}
+.wkmenu .mh{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600;padding:8px 8px 4px}
+.wkmenu .opt{display:flex;justify-content:space-between;align-items:center;width:100%;font:inherit;color:var(--ink);background:none;border:0;border-radius:6px;padding:7px 8px;cursor:pointer;text-align:left}
+.wkmenu .opt:hover,.wkmenu .opt:focus-visible{background:var(--surface-2);outline:none}
+.wkmenu .opt[aria-selected="true"]{background:var(--accent-soft);font-weight:600}
+.wkmenu .opt small{color:var(--ink-3);font-size:11px;font-weight:400}
+.weekpick > button{width:34px;padding:0;cursor:pointer;font-size:16px}
+.weekpick button:disabled{opacity:.35;cursor:default}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;margin-top:12px;scrollbar-width:none}
+nav.tabs button{font:inherit;font-weight:500;color:var(--ink-2);background:none;border:0;border-bottom:2px solid transparent;padding:8px 12px 10px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px}
+nav.tabs button:hover{color:var(--ink)}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-top:22px;display:grid;gap:22px}
+.pagehead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px}
+.pagehead h2{font-size:26px;font-weight:700;letter-spacing:-.015em}
+.pagehead .sub{color:var(--ink-2)}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-3);font-weight:600}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.panel h3{font-size:16px;font-weight:700}
+.panel .ph{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px;margin-bottom:12px}
+.panel .ph p{margin:2px 0 0;color:var(--ink-3);font-size:12.5px;max-width:70ch}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow);min-width:0}
+.tile .lab{font-size:12px;color:var(--ink-2);font-weight:500}
+.tile .val{font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.tile .chips{flex-direction:column;align-items:flex-start}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;border-radius:999px;padding:2px 8px;background:var(--neutral-bg);color:var(--ink);white-space:nowrap}
+.chip .ic{font-size:10px}
+.chip.good{background:var(--good-bg)}.chip.good .ic{color:var(--good)}
+.chip.warn{background:var(--warn-bg)}.chip.warn .ic{color:var(--warn)}
+.chip.crit{background:var(--crit-bg)}.chip.crit .ic{color:var(--crit)}
+.chip .k{color:var(--ink-3);font-weight:400}
+.spark{height:34px;margin-top:2px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+@media (max-width:420px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+.chart{position:relative;width:100%}
+.chart svg{display:block;overflow:visible}
+.mini h4{margin:0 0 2px;font-size:13px;font-weight:600}
+.mini .mv{font-size:12px;color:var(--ink-3);margin-bottom:6px}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.12);white-space:nowrap;z-index:3;min-width:130px}
+.tip b{display:block;font-weight:600;margin-bottom:3px}
+.tip .r{display:flex;justify-content:space-between;gap:14px;align-items:center}
+.tip .r span:first-child{color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--ink-2);margin-bottom:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.legend i.dash{background:repeating-linear-gradient(90deg,var(--ink-3) 0 4px,transparent 4px 7px)!important;height:2px}
+.tablewrap{overflow-x:auto;margin-inline:-4px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);font-weight:600;background:var(--surface)}
+td.sel,th.sel{background:var(--accent-soft)}
+tr.grp td{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:600;padding-top:14px;border-bottom:0;background:none}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover td{background:var(--surface-2)}
+.segname{display:flex;align-items:center;gap:8px;font-weight:600}
+.tipgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tipgrid>div{min-width:0}
+@media (max-width:560px){.tipgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.panel.col{display:flex;flex-direction:column}
+.chart.fill{flex:1;min-height:230px}
+.tstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.tstats div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tstats span{font-size:11.5px;color:var(--ink-3)}
+.tstats b{font-family:var(--display);font-size:18px;font-weight:700}
+.tstats small{font-size:11px;color:var(--ink-3)}
+@media (max-width:560px){.tstats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mini{min-width:0}
+.avgk{font-weight:400;color:var(--ink-3);font-size:12px;margin-left:8px;white-space:nowrap}
+
+.loadmsg{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);color:var(--ink-2);z-index:40}
+.wfhead .chip{vertical-align:1px}
+.wfhead{margin:0 0 6px;font-size:14px;max-width:62ch}
+.wfhead .dnc{color:var(--crit)}.wfhead .upc{color:var(--good)}
+.wfdet{display:grid;gap:6px;margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
+.wfdet div{display:grid;grid-template-columns:90px 1fr auto;gap:8px;align-items:center;font-size:12.5px;color:var(--ink-2)}
+.wfdet .wfn{font-weight:600;color:var(--ink)}
+.drv{display:grid;grid-template-columns:minmax(110px,170px) 1fr;gap:10px 14px;align-items:center}
+.drv .dl{font-size:13px}
+.drv .dl small{display:block;color:var(--ink-3);font-size:11.5px}
+.drv .bar{position:relative;height:26px;background:linear-gradient(var(--line),var(--line)) center/1px 100% no-repeat}
+.drv .bar div{position:absolute;top:3px;height:20px;border-radius:4px}
+.drv .bar em{position:absolute;top:4px;font-style:normal;font-size:12px;font-weight:600;white-space:nowrap}
+.drv .net .dl{font-weight:700}
+.drv hr{grid-column:1/-1;border:0;border-top:1px solid var(--line);margin:2px 0}
+.funnel{display:grid;gap:8px}
+.fstep{display:grid;grid-template-columns:minmax(96px,130px) 1fr;gap:12px;align-items:center}
+.fstep .fl{font-size:13px}
+.fstep .fl small{display:block;color:var(--ink-3);font-size:11.5px}
+.fbar{height:26px;background:var(--surface-2);border-radius:4px;position:relative;overflow:hidden}
+.fbar div{height:100%;border-radius:4px}
+.fbar span{position:absolute;left:8px;top:4px;font-size:12px;font-weight:600;color:var(--ink)}
+.fconv{margin-left:calc(min(130px,40%) + 12px);display:flex;gap:8px;align-items:center;font-size:12px;color:var(--ink-2)}
+.flags{display:grid;gap:8px}
+.flag{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 12px;border-radius:8px;background:var(--surface-2);cursor:pointer;border:0;font:inherit;color:inherit;text-align:left;width:100%}
+.flag:hover{outline:1px solid var(--line)}
+.flag .fm{font-size:13px}
+.flag .fm small{color:var(--ink-3)}
+.showmore{font:inherit;font-weight:500;color:var(--accent);background:none;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;justify-self:start}
+.note{font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:10px 12px;border-left:3px solid var(--warn)}
+.note b{color:var(--ink)}
+.foot{color:var(--ink-3);font-size:12px;max-width:80ch}
+@media (prefers-reduced-motion:no-preference){.fbar div,.drv .bar div{transition:width .35s ease,left .35s ease}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header class="top">
+  <div class="toprow">
+    <div class="brand"><h1>Demand Midweek Review</h1><p id="subline">Weekly fundraising demand · 4 segments</p></div>
+    <div class="weekpick">
+      <span class="wklab">Week of</span>
+      <button id="prev" type="button" aria-label="Previous week">‹</button>
+      <div class="wk"><button id="wkbtn" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="wktxt"></span><span class="car" aria-hidden="true">▾</span></button>
+        <div class="wkmenu" id="wkmenu" role="listbox" aria-label="Choose week" hidden></div></div>
+      <button id="next" type="button" aria-label="Next week">›</button>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+</header>
+<main id="main"></main>
+</div>
+
+<div id="loading" class="loadmsg">Loading latest data…</div>
+<script>
+(async function start(){
+  const load=document.getElementById('loading');
+  try{const r=await fetch('/api/data',{cache:'no-store'});
+    if(!r.ok)throw new Error('Server error '+r.status+': '+(await r.text()).slice(0,200));
+    const data=await r.json();load.hidden=true;boot(data);}
+  catch(e){load.textContent='Could not load data. '+e.message+' Refresh the page to try again.';}
+})();
+
+function boot(DATA){
+const SEGS=[
+  {id:'pm',name:'Personal Medical',short:'Pers. Medical',c:'--s1'},
+  {id:'pnm',name:'Personal Non-Medical',short:'Pers. Non-Med',c:'--s2'},
+  {id:'ngm',name:'NGO Medical',short:'NGO Medical',c:'--s3'},
+  {id:'ngnm',name:'NGO Non-Medical',short:'NGO Non-Med',c:'--s4'}];
+const W=DATA.weeks, N=W.length;
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const wd=i=>{const [y,m,d]=W[i].split('-').map(Number);return {y,m,d}};
+const wkLabel=(i,yr)=>{const {y,m,d}=wd(i);return d+' '+MON[m-1]+(yr?' '+y:'')};
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---------- derive ----------
+const div=(a,b)=>a.map((x,i)=>(x!=null&&b[i])?x/b[i]:null);
+function derive(r){
+  const d={...r};
+  d.ats=div(r.don,r.orders); d.conv=div(r.orders,r.uv); d.rpu=div(r.don,r.uv);
+  d.tipShare=div(r.tipOrders,r.orders); d.tipRate=div(r.tip,r.don); d.avgTip=div(r.tip,r.tipOrders);
+  d.opd=div(r.orders,r.donors); d.vpu=div(r.views,r.uv);
+  d.f1=div(r.cart,r.init); d.f2=div(r.ocreated,r.cart); d.f3=div(r.placed,r.ocreated); d.fAll=div(r.placed,r.init);
+  d.donPerLive=div(r.don,r.live); d.avgDays=div(r.liveDays,r.live); d.raisedLive=div(r.raised,r.live);
+  return d;
+}
+const D={}; SEGS.forEach(s=>D[s.id]=derive(DATA.seg[s.id]));
+// total across segments (additive metrics only)
+(()=>{const t={};const add=['views','uv','donors','orders','don','tipOrders','tip','init','cart','ocreated','placed','raised','approved','live','liveDays'];
+  add.forEach(k=>t[k]=W.map((_,i)=>SEGS.reduce((a,s)=>a+(DATA.seg[s.id][k][i]||0),0)));
+  D.all=derive(t);})();
+
+// ---------- format ----------
+function inr(v,dp){if(v==null||!isFinite(v))return '–';const a=Math.abs(v);
+  if(a>=1e7)return '₹'+(v/1e7).toFixed(dp??2)+' Cr';
+  if(a>=1e5)return '₹'+(v/1e5).toFixed(dp??1)+' L';
+  if(a>=1e3)return '₹'+(v/1e3).toFixed(dp??1)+'K';
+  return '₹'+Math.round(v).toLocaleString('en-IN');}
+const inrAx=v=>inr(v,v>=1e7?1:v>=1e5?0:0).replace('.0 ',' ');
+const rup=v=>v==null?'–':'₹'+Math.round(v).toLocaleString('en-IN');
+function num(v){if(v==null||!isFinite(v))return '–';const a=Math.abs(v);
+  if(a>=1e5)return (v/1e5).toFixed(2)+' L';if(a>=1e4)return (v/1e3).toFixed(1)+'K';return Math.round(v).toLocaleString('en-IN');}
+const pct=(v,dp=1)=>v==null||!isFinite(v)?'–':(v*100).toFixed(dp)+'%';
+const dec=(v,dp=2)=>v==null?'–':v.toFixed(dp);
+const FMT={inr,rup,num,pct,dec,int:v=>v==null?'–':Math.round(v).toLocaleString('en-IN')};
+
+// ---------- stats ----------
+const avg4=(a,i)=>{const s=a.slice(Math.max(0,i-4),i).filter(x=>x!=null);return s.length?s.reduce((p,c)=>p+c,0)/s.length:null};
+// ratio metrics: 4-wk ratio of sums
+const RATIO={ats:['don','orders'],conv:['orders','uv'],rpu:['don','uv'],tipShare:['tipOrders','orders'],tipRate:['tip','don'],avgTip:['tip','tipOrders'],
+  f1:['cart','init'],f2:['ocreated','cart'],f3:['placed','ocreated'],fAll:['placed','init'],donPerLive:['don','live'],avgDays:['liveDays','live'],raisedLive:['raised','live'],opd:['orders','donors'],vpu:['views','uv']};
+function base4(d,k,i){if(RATIO[k]){const [a,b]=RATIO[k];const A=avg4(d[a],i),B=avg4(d[b],i);return A!=null&&B?A/B:null}return avg4(d[k],i)}
+const chg=(v,b)=>(v==null||b==null||b===0)?null:v/b-1;
+const roll4=a=>a.map((_,i)=>i<3?null:a.slice(i-3,i+1).reduce((p,c)=>p+(c||0),0)/4);
+
+function chip(c,label,invert){
+  if(c==null)return `<span class="chip"><span class="k">${label}</span> –</span>`;
+  const g=invert?-c:c; let cls='',ic='●';
+  if(g>=0.05){cls='good';ic='▲'}else if(g<=-0.15){cls='crit';ic='▼'}else if(g<=-0.05){cls='warn';ic='▼'}else{ic=c>=0?'▲':'▼'}
+  if(invert&&cls)ic=c>0?'▲':'▼';
+  return `<span class="chip ${cls}"><span class="ic" aria-hidden="true">${ic}</span><span class="k">${label}</span> ${c>0?'+':''}${(c*100).toFixed(0)}%</span>`;
+}
+
+// ---------- charts ----------
+function niceTicks(min,max,n=4){if(max===min){max=min+1}const span=max-min,step0=span/n,mag=Math.pow(10,Math.floor(Math.log10(step0)));
+  const step=[1,2,2.5,5,10].map(m=>m*mag).find(s=>span/s<=n)||10*mag;const t=[];for(let v=Math.floor(min/step)*step;v<max+step-1e-9;v+=step)t.push(+v.toFixed(10));return t}
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+/* line chart: opts {series:[{name,vals,color,dash,width}], fmt, height, sel, from, zero, compact, bars:[{name,vals,color}] (stacked)} */
+function chart(el,o){
+  const draw=()=>{
+    if(o.fill)el.innerHTML='';const Wd=el.clientWidth||600,H=o.fill?Math.max(o.height||220,el.clientHeight):(o.height||220),compact=o.compact;
+    const pl=compact?40:56,pr=12,pt=10,pb=compact?20:24,iw=Wd-pl-pr,ih=H-pt-pb;
+    const from=o.from||0,to=N-1,idx=[];for(let i=from;i<=to;i++)idx.push(i);
+    let vals=[];
+    if(o.bars){idx.forEach(i=>vals.push(o.bars.reduce((a,b)=>a+(b.vals[i]||0),0)))}
+    o.series&&o.series.forEach(s=>idx.forEach(i=>{if(s.vals[i]!=null)vals.push(s.vals[i])}));
+    let mn=Math.min(...vals),mx=Math.max(...vals);if(o.zero||o.bars)mn=0;else{const pad=(mx-mn)*.08;mn=Math.max(0,mn-pad);mx+=pad}
+    let clipped=false;
+    if(o.robust&&o.series){const mv=idx.map(i=>o.series[0].vals[i]).filter(v=>v!=null).sort((a,b)=>a-b);const p90=mv[Math.floor(mv.length*.9)];
+      const others=o.series.slice(1).flatMap(se=>idx.map(i=>se.vals[i]).filter(v=>v!=null));
+      const cap=Math.max(p90*1.5,(o.series[0].vals[o.sel]||0)*1.15,...others.map(v=>v*1.05));if(mx>cap){mx=cap;clipped=true}}
+    const ticks=niceTicks(mn,mx,compact?3:4);mn=Math.min(mn,ticks[0]);mx=Math.max(mx,ticks[ticks.length-1]);
+    const cid='c'+Math.random().toString(36).slice(2,8);const n=idx.length,bw=iw/n;const x=i=>pl+(i-from+.5)*bw;const y=v=>pt+ih-(v-mn)/(mx-mn)*ih;
+    let s=`<svg width="${Wd}" height="${H}" role="img" aria-label="${esc(o.label||'chart')}">`;
+    ticks.forEach(t=>{s+=`<line x1="${pl}" x2="${Wd-pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)"/>`;
+      s+=`<text x="${pl-6}" y="${y(t)+4}" text-anchor="end" font-size="11" fill="var(--ink-3)">${esc(o.fmt(t,0))}</text>`});
+    // month labels
+    let lastM=-1,step=Wd<520?2:1,cnt=0,lastX=-99;
+    idx.forEach(i=>{const {y:yy,m,d}=wd(i);if(m!==lastM&&d<=7){lastM=m;const lbx=x(i)-bw/2;if(cnt++%step===0&&lbx-lastX>(i===from?0:48)){lastX=lbx;
+      s+=`<text x="${x(i)-bw/2}" y="${H-5}" font-size="11" fill="var(--ink-3)">${MON[m-1]}${m===1||i===from?" '"+String(yy).slice(2):''}</text>`;}}});
+    if(o.sel!=null&&o.sel>=from)s+=`<rect x="${x(o.sel)-bw/2}" y="${pt}" width="${bw}" height="${ih}" fill="var(--accent-soft)"/>`;
+    if(o.bars){idx.forEach(i=>{let acc=0;o.bars.forEach((b,bi)=>{const v=b.vals[i]||0;const y0=y(acc),y1=y(acc+v);acc+=v;
+        const h=Math.max(0,y0-y1-(bi?2:0));const top=bi===o.bars.length-1;
+        s+=`<rect x="${x(i)-bw*0.36}" y="${y1}" width="${bw*0.72}" height="${h}" fill="${b.color}" ${top?'rx="2"':''}/>`;})})}
+    s+=`<clipPath id="${cid}"><rect x="${pl-4}" y="${pt}" width="${iw+8}" height="${ih+1}"/></clipPath><g clip-path="url(#${cid})">`;
+    o.series&&o.series.forEach(se=>{let d='',pen=false;idx.forEach(i=>{const v=se.vals[i];if(v==null){pen=false;return}d+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1);pen=true});
+      if(se.area){const first=idx.find(i=>se.vals[i]!=null);s+=`<path d="${d}L${x(to)} ${pt+ih}L${x(first)} ${pt+ih}Z" fill="${se.color}" opacity=".10"/>`}
+      s+=`<path d="${d}" fill="none" stroke="${se.color}" stroke-width="${se.width||2}" ${se.dash?'stroke-dasharray="4 3"':''} stroke-linejoin="round" stroke-linecap="round"/>`;});
+    s+='</g>';
+    const main=o.series&&o.series[0];
+    if(clipped&&main){const top=mx;const over=idx.filter(i=>main.vals[i]!=null&&main.vals[i]>top);const big=over.reduce((a,b)=>main.vals[b]>main.vals[a]?b:a,over[0]);
+      over.forEach(i=>{s+=`<path d="M${x(i)-5} ${pt+7}L${x(i)} ${pt-1}L${x(i)+5} ${pt+7}Z" fill="${main.color}" stroke="var(--surface)" stroke-width="1.5"/>`});
+      if(big!=null){const lx=x(big),lab=(o.tfmt||o.fmt)(main.vals[big])+' · '+wkLabel(big),right=lx+9+lab.length*6.4<Wd;s+=`<text x="${right?lx+9:lx-9}" y="${pt+8}" text-anchor="${right?'start':'end'}" font-size="11" font-weight="600" fill="var(--ink-2)">${esc((o.tfmt||o.fmt)(main.vals[big]))} · ${wkLabel(big)}</text>`}}
+    if(main&&o.sel!=null&&main.vals[o.sel]!=null)s+=`<circle cx="${x(o.sel)}" cy="${y(main.vals[o.sel])}" r="4.5" fill="${main.color}" stroke="var(--surface)" stroke-width="2"/>`;
+    s+=`<line class="xh" x1="0" x2="0" y1="${pt}" y2="${pt+ih}" stroke="var(--ink-3)" stroke-dasharray="3 3" visibility="hidden"/>`;
+    s+=`<rect class="hit" x="${pl}" y="${pt}" width="${iw}" height="${ih}" fill="transparent"/></svg><div class="tip" hidden></div>`;
+    el.innerHTML=s;
+    const svg=el.querySelector('svg'),tip=el.querySelector('.tip'),xh=el.querySelector('.xh');
+    const move=ev=>{const r=svg.getBoundingClientRect();const px=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;
+      const i=Math.min(to,Math.max(from,from+Math.floor((px-pl)/bw)));
+      xh.setAttribute('x1',x(i));xh.setAttribute('x2',x(i));xh.setAttribute('visibility','visible');
+      let h=`<b>Week of ${wkLabel(i,true)}</b>`;
+      if(o.bars){[...o.bars].reverse().forEach(b=>h+=`<div class="r"><span><i class="dot" style="background:${b.color}"></i>${b.name}</span><span>${(o.tfmt||o.fmt)(b.vals[i])}</span></div>`);
+        h+=`<div class="r" style="border-top:1px solid var(--line);margin-top:3px;padding-top:3px"><span>Total</span><span><b style="display:inline">${(o.tfmt||o.fmt)(o.bars.reduce((a,b)=>a+(b.vals[i]||0),0))}</b></span></div>`}
+      o.series&&o.series.forEach(se=>h+=`<div class="r"><span><i class="dot" style="background:${se.color}"></i>${se.name}</span><span>${(o.tfmt||o.fmt)(se.vals[i])}</span></div>`);
+      tip.innerHTML=h;tip.hidden=false;const tw=tip.offsetWidth;let lx=x(i)+12;if(lx+tw>Wd)lx=x(i)-tw-12;tip.style.left=Math.max(0,lx)+'px';tip.style.top=pt+'px';};
+    svg.addEventListener('mousemove',move);svg.addEventListener('touchstart',move,{passive:true});
+    svg.addEventListener('mouseleave',()=>{tip.hidden=true;xh.setAttribute('visibility','hidden')});
+    if(o.onPick)svg.addEventListener('click',ev=>{const r=svg.getBoundingClientRect();const i=Math.min(to,Math.max(from,from+Math.floor((ev.clientX-r.left-pl)/bw)));o.onPick(i)});
+    if(o.onPick)svg.style.cursor='pointer';
+  };
+  el._draw=draw;draw();
+}
+let WF=null;
+function waterfall(el,wf){
+  const draw=()=>{
+    const Wd=el.clientWidth||500,H=250,pt=26,pb=44,ih=H-pt-pb;
+    const cols=[{n:'4-wk avg',kind:'total',v:wf.D0}];let lvl=wf.D0;
+    wf.drivers.forEach(x=>{cols.push({n:x.n,kind:'delta',from:lvl,to:lvl+x.a,a:x.a,c:x.c});lvl+=x.a});
+    cols.push({n:'This week',kind:'total',v:wf.D1});
+    const levels=[wf.D0,wf.D1];cols.forEach(c=>{if(c.kind==='delta'){levels.push(c.from,c.to)}});
+    const lo=Math.min(...levels),hi=Math.max(...levels),span=(hi-lo)||hi*.1;
+    let ymin=Math.max(0,lo-span*0.9);if(ymin<hi*0.15)ymin=0;const ymax=hi+span*0.08;
+    const y=v=>pt+ih-(v-ymin)/(ymax-ymin)*ih;
+    const n=cols.length,slot=Wd/n,bw=Math.min(64,slot*0.58),nar=slot<90,fs=nar?10.5:12.5;
+    const SHORT={'4-wk avg':'4-wk avg','Traffic':'Traffic','Conversion':'Conv.','Ticket size':'Ticket','This week':'This wk'};const cx=k=>slot*(k+.5);
+    const neg=cssv('--neg'),pos=cssv('--pos'),base=cssv('--ink-3');
+    let s=`<svg width="${Wd}" height="${H}" role="img" aria-label="Donations bridge from 4-week average to this week">`;
+    s+=`<line x1="0" x2="${Wd}" y1="${pt+ih}" y2="${pt+ih}" stroke="var(--line)"/>`;
+    cols.forEach((c,k)=>{
+      const x0=cx(k)-bw/2;
+      if(c.kind==='total'){
+        const top=y(c.v),fill=k===0?'var(--surface-2)':wf.col,stroke=k===0?'var(--ink-3)':'none';
+        s+=`<rect x="${x0}" y="${top}" width="${bw}" height="${pt+ih-top}" rx="4" fill="${fill}" stroke="${stroke}" stroke-dasharray="${k===0?'4 3':''}"/>`;
+        if(ymin>0){const yb=pt+ih-10;s+=`<path d="M${x0-2} ${yb+3}l${bw/4} -6l${bw/4} 6l${bw/4} -6l${bw/4+2} 6" fill="none" stroke="var(--surface)" stroke-width="4"/>`}
+        s+=`<text x="${cx(k)}" y="${top-8}" text-anchor="middle" font-size="${nar?11:13}" font-weight="700" fill="var(--ink)">${inr(c.v)}</text>`;
+      }else{
+        const a=Math.min(c.from,c.to),b=Math.max(c.from,c.to),hgt=Math.max(2,y(a)-y(b));
+        s+=`<rect x="${x0}" y="${y(b)}" width="${bw}" height="${hgt}" rx="3" fill="${c.a>=0?pos:neg}"/>`;
+        s+=`<text x="${cx(k)}" y="${y(b)-8}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="var(--ink)">${c.a>=0?'+':'−'}${(nar?inr(Math.abs(c.a)).replace(' ',''):inr(Math.abs(c.a)))}</text>`;
+      }
+      // connector to next
+      if(k<n-1){const lv=c.kind==='total'?c.v:c.to;s+=`<line x1="${x0+bw}" x2="${cx(k+1)-bw/2}" y1="${y(lv)}" y2="${y(lv)}" stroke="${base}" stroke-dasharray="3 3"/>`}
+      s+=`<text x="${cx(k)}" y="${pt+ih+18}" text-anchor="middle" font-size="${nar?11:12}" font-weight="600" fill="var(--ink)">${nar?SHORT[c.n]:c.n}</text>`;
+      const sub=c.kind==='total'?(k===0?(nar?'start':'starting point'):'result'):(c.c==null?'':(c.c>=0?'+':'−')+Math.abs(c.c*100).toFixed(0)+'%');
+      s+=`<text x="${cx(k)}" y="${pt+ih+34}" text-anchor="middle" font-size="11" fill="var(--ink-3)">${sub}</text>`;
+    });
+    el.innerHTML=s+'</svg>';
+  };
+  el._draw=draw;draw();
+}
+function barsChart(el,o){
+  const draw=()=>{
+    el.innerHTML='';const Wd=el.clientWidth||600,H=o.height||170,pl=8,pr=8,pt=22,pb=22,iw=Wd-pl-pr,ih=H-pt-pb;
+    const idx=[];for(let k=Math.max(0,o.sel-11);k<=o.sel;k++)idx.push(k);
+    const n=idx.length,slot=iw/n,bw=Math.min(40,slot*0.62);
+    const vals=idx.map(k=>o.vals[k]||0),mx=Math.max(...vals,o.avg||0)*1.12||1;
+    const y=v=>pt+ih-v/mx*ih,cx=j=>pl+slot*(j+.5);
+    let s=`<svg width="${Wd}" height="${H}" role="img" aria-label="${esc(o.label)}">`;
+    idx.forEach((k,j)=>{const v=o.vals[k];if(v==null)return;const isSel=k===o.sel;
+      s+=`<g class="bh" data-k="${k}"><rect x="${cx(j)-slot/2}" y="${pt}" width="${slot}" height="${ih}" fill="transparent"/>`;
+      s+=`<rect x="${cx(j)-bw/2}" y="${y(v)}" width="${bw}" height="${pt+ih-y(v)}" rx="3" fill="${o.color}" opacity="${isSel?1:.38}"/>`;
+      if(isSel)s+=`<text x="${cx(j)}" y="${y(v)-6}" text-anchor="middle" font-size="12" font-weight="700" paint-order="stroke" stroke="var(--surface)" stroke-width="4" fill="var(${isSel?'--ink':'--ink-3'})">${esc(o.fmt(v))}</text>`;
+      if(((n-1-j)%(slot<34?2:1)===0)||isSel)s+=`<text x="${cx(j)}" y="${H-6}" text-anchor="middle" font-size="10.5" fill="var(${isSel?'--ink':'--ink-3'})" font-weight="${isSel?600:400}">${wkLabel(k)}</text>`;
+      s+=`</g>`;});
+    s+=`<line x1="${pl}" x2="${Wd-pr}" y1="${pt+ih}" y2="${pt+ih}" stroke="var(--line)"/>`;
+    if(o.avg){s+=`<line x1="${pl}" x2="${Wd-pr}" y1="${y(o.avg)}" y2="${y(o.avg)}" stroke="var(--ink-2)" stroke-dasharray="4 3"/>`;
+}
+    el.innerHTML=s+'</svg><div class="tip" hidden></div>';
+    const tip=el.querySelector('.tip');
+    el.querySelectorAll('.bh').forEach(g=>{const k=+g.dataset.k;
+      g.addEventListener('mouseenter',()=>{tip.innerHTML=`<b>Week of ${wkLabel(k,true)}</b><div class="r"><span>${o.label}</span><span>${o.tfmt?o.tfmt(o.vals[k]):o.fmt(o.vals[k])}</span></div>`;tip.hidden=false;
+        const j=idx.indexOf(k);let lx=cx(j)+14;if(lx+tip.offsetWidth>Wd)lx=cx(j)-tip.offsetWidth-14;tip.style.left=Math.max(0,lx)+'px';tip.style.top='0px'});
+      g.addEventListener('mouseleave',()=>tip.hidden=true);
+      g.style.cursor='pointer';g.addEventListener('click',()=>pick(k));});
+  };
+  el._draw=draw;draw();
+}
+function spark(el,vals,i,color){
+  const Wd=el.clientWidth||180,H=34,from=Math.max(0,i-25),a=vals.slice(from,i+1);const f=a.filter(v=>v!=null);
+  const mn=Math.min(...f),mx=Math.max(...f)||1;const x=k=>2+k/(a.length-1||1)*(Wd-6),y=v=>H-3-(v-mn)/((mx-mn)||1)*(H-8);
+  let d='';a.forEach((v,k)=>{if(v!=null)d+=(d?'L':'M')+x(k).toFixed(1)+' '+y(v).toFixed(1)});
+  el.innerHTML=`<svg width="${Wd}" height="${H}" aria-hidden="true"><path d="${d}L${x(a.length-1)} ${H}L${x(0)} ${H}Z" fill="${color}" opacity=".10"/><path d="${d}" fill="none" stroke="${color}" stroke-width="1.75" stroke-linejoin="round"/><circle cx="${x(a.length-1)}" cy="${y(a[a.length-1])}" r="3.2" fill="${color}"/></svg>`;
+  el._draw=()=>spark(el,vals,i,color);
+}
+
+// ---------- state ----------
+let seg='overview',sel=N-1;
+try{const s=localStorage.getItem('dmr-seg');if(s)seg=s}catch(e){}
+if(location.hash&&['overview',...SEGS.map(s=>s.id)].includes(location.hash.slice(1)))seg=location.hash.slice(1);
+const wkbtn=document.getElementById('wkbtn'),wkmenu=document.getElementById('wkmenu');
+function buildMenu(){let h='',lastM='';for(let i=N-1;i>=0;i--){const {y,m}=wd(i);const key=y+'-'+m;
+  if(key!==lastM){lastM=key;h+=`<div class="mh">${MON[m-1]} ${y}</div>`}
+  h+=`<button type="button" class="opt" role="option" data-i="${i}" aria-selected="${i===sel}"><span>${wkLabel(i)}</span>${i===N-1?'<small>Latest</small>':''}</button>`}
+  wkmenu.innerHTML=h}
+function openMenu(o){wkmenu.hidden=!o;wkbtn.setAttribute('aria-expanded',o);if(o){buildMenu();const s=wkmenu.querySelector('[aria-selected="true"]');if(s){wkmenu.scrollTop=s.offsetTop-wkmenu.clientHeight/2;s.focus({preventScroll:true})}}}
+wkbtn.addEventListener('click',e=>{e.stopPropagation();openMenu(wkmenu.hidden)});
+wkmenu.addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b)return;sel=+b.dataset.i;openMenu(false);wkbtn.focus();render()});
+wkmenu.addEventListener('keydown',e=>{const opts=[...wkmenu.querySelectorAll('.opt')];const k=opts.indexOf(document.activeElement);
+  if(e.key==='ArrowDown'){e.preventDefault();(opts[k+1]||opts[k]).focus()}else if(e.key==='ArrowUp'){e.preventDefault();(opts[k-1]||opts[k]).focus()}
+  else if(e.key==='Escape'){openMenu(false);wkbtn.focus()}});
+document.addEventListener('click',e=>{if(!wkmenu.hidden&&!e.target.closest('.wk'))openMenu(false)});
+const tabs=document.getElementById('tabs');
+tabs.innerHTML=`<button role="tab" data-s="overview">Overview</button>`+SEGS.map(s=>`<button role="tab" data-s="${s.id}"><i class="dot" style="background:var(${s.c})"></i>${s.name}</button>`).join('');
+tabs.addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.s)});
+document.getElementById('prev').onclick=()=>{if(sel>0){sel--;render()}};
+document.getElementById('next').onclick=()=>{if(sel<N-1){sel++;render()}};
+function go(s){seg=s;try{localStorage.setItem('dmr-seg',s)}catch(e){};history.replaceState(null,'','#'+s);render();window.scrollTo({top:0})}
+const pick=i=>{sel=i;render()};
+
+// ---------- KPI defs ----------
+const KPIS=[
+  {k:'don',label:'Donations (excl. tip)',f:inr},
+  {k:'donors',label:'Unique donors',f:num},
+  {k:'ats',label:'Avg ticket size',f:rup},
+  {k:'conv',label:'Order conversion',f:v=>pct(v,2),sub:'orders ÷ unique visitors'},
+  {k:'tip',label:'Tip revenue',f:inr}];
+function tile(d,def,i,color){
+  const v=d[def.k][i],p=i>0?d[def.k][i-1]:null,b=base4(d,def.k,i);
+  return `<div class="tile"><div class="lab">${def.label}</div><div class="val">${def.f(v)}</div>
+  <div class="chips">${chip(chg(v,p),'WoW')}${chip(chg(v,b),'vs 4-wk')}</div></div>`;
+}
+
+// ---------- flags ----------
+const FLAGDEF=[['don','Donations',inr],['donors','Unique donors',num],['uv','Unique visitors',num],['conv','Order conversion',v=>pct(v,2)],['ats','Avg ticket size',rup],['tip','Tip revenue',inr],['live','Campaigns live',FMT.int],['raised','New campaigns raised',FMT.int]];
+function flagsFor(id,i){const d=D[id];const out=[];FLAGDEF.forEach(([k,l,f])=>{const c=chg(d[k][i],base4(d,k,i));if(c!=null&&c<=-0.15)out.push({id,k,l,c,v:f(d[k][i]),b:f(base4(d,k,i))})});return out}
+
+// ---------- pages ----------
+function overview(){
+  const i=sel,t=D.all;
+  const colors=SEGS.map(s=>cssv(s.c));
+  const totalDon=t.don[i];
+  let h=`<div class="pagehead"><div><div class="eyebrow">Overview</div><h2>All segments · week of ${wkLabel(i,true)}</h2></div>
+    <div class="sub">Compared with the previous week (WoW) and the average of the 4 weeks before</div></div>`;
+  h+=`<section class="tiles">${[
+    {k:'don',label:'Total donations (excl. tip)',f:inr},{k:'donors',label:'Unique donors',f:num},{k:'ats',label:'Avg ticket size',f:rup},{k:'conv',label:'Order conversion',f:v=>pct(v,2)},{k:'tip',label:'Tip revenue',f:inr}
+  ].map(def=>tile(t,def,i,cssv('--accent'))).join('')}</section>`;
+  // scorecard
+  h+=`<section class="panel"><div class="ph"><div><h3>Segment scorecard</h3><p>Tap a row to open that segment. Personal Medical brings in most of the money, so its swings move the total.</p></div></div>
+  <div class="tablewrap"><table><thead><tr><th>Segment</th><th>Donations</th><th>Share</th><th>WoW</th><th>vs 4-wk</th><th>Donors</th><th>Visitors</th><th>Conversion</th><th>Avg ticket</th><th>Tips</th><th>Live camp.</th></tr></thead><tbody>`;
+  SEGS.forEach(s=>{const d=D[s.id];h+=`<tr class="click" data-go="${s.id}" tabindex="0"><td><span class="segname"><i class="dot" style="background:var(${s.c})"></i>${s.name}</span></td>
+    <td><b>${inr(d.don[i])}</b></td><td>${pct(d.don[i]/totalDon,0)}</td><td>${chip(chg(d.don[i],d.don[i-1]),'')}</td><td>${chip(chg(d.don[i],base4(d,'don',i)),'')}</td>
+    <td>${num(d.donors[i])}</td><td>${num(d.uv[i])}</td><td>${pct(d.conv[i],2)}</td><td>${rup(d.ats[i])}</td><td>${inr(d.tip[i])}</td><td>${FMT.int(d.live[i])}</td></tr>`});
+  h+=`<tr><td><b>Total</b></td><td><b>${inr(totalDon)}</b></td><td>100%</td><td>${chip(chg(t.don[i],t.don[i-1]),'')}</td><td>${chip(chg(t.don[i],base4(t,'don',i)),'')}</td><td>${num(t.donors[i])}</td><td>${num(t.uv[i])}</td><td>${pct(t.conv[i],2)}</td><td>${rup(t.ats[i])}</td><td>${inr(t.tip[i])}</td><td>–</td></tr>`;
+  h+=`</tbody></table></div></section>`;
+  h+=`<section class="panel" id="stackp"><div class="ph"><div><h3>Weekly donations by segment</h3><p>Excl. tips. Click a bar to jump to that week.</p></div></div>
+   <div class="legend">${SEGS.map(s=>`<span><i style="background:var(${s.c});height:10px;width:10px;border-radius:2px"></i>${s.name}</span>`).join('')}</div><div class="chart" id="stack"></div></section>`;
+  // flags
+  const fl=SEGS.flatMap(s=>flagsFor(s.id,i)).sort((a,b)=>a.c-b.c);
+  h+=`<section class="panel"><div class="ph"><div><h3>Needs attention</h3><p>Headline metrics more than 15% below their 4-week average this week.</p></div></div><div class="flags">`;
+  if(!fl.length)h+=`<p class="foot">Nothing more than 15% below its 4-week average this week.</p>`;
+  fl.forEach((f,n)=>{const s=SEGS.find(x=>x.id===f.id);h+=`<button class="flag${n>=8?' more':''}" ${n>=8?'hidden':''} data-go="${f.id}"><i class="dot" style="background:var(${s.c})"></i><span class="fm"><b>${s.name}</b> · ${f.l} <small>${f.v} vs ${f.b} avg</small></span>${chip(f.c,'')}</button>`});
+  if(fl.length>8)h+=`<button type="button" class="showmore" id="showmore">Show ${fl.length-8} more</button>`;
+  h+=`</div></section>`;
+  return {h,after(){
+    const sm=document.getElementById('showmore');if(sm)sm.onclick=()=>{document.querySelectorAll('.flag.more').forEach(e=>e.hidden=false);sm.remove()};
+    chart(document.getElementById('stack'),{bars:SEGS.map(s=>({name:s.name,vals:D[s.id].don,color:cssv(s.c)})),fmt:inrAx,tfmt:v=>inr(v),height:260,sel:i,onPick:pick,label:'Weekly donations by segment'});
+  }};
+}
+
+function segment(id){
+  const s=SEGS.find(x=>x.id===id),d=D[id],i=sel,col=cssv(s.c);
+  let h=`<div class="pagehead"><div><div class="eyebrow"><i class="dot" style="background:var(${s.c})"></i> Segment</div><h2>${s.name} · week of ${wkLabel(i,true)}</h2></div>
+    <div class="sub">Compared with the previous week (WoW) and the average of the 4 weeks before</div></div>`;
+  h+=`<section class="tiles">${KPIS.map(k=>tile(d,k,i,col)).join('')}</section>`;
+  // driver decomposition -> bridge (waterfall)
+  const uv0=avg4(d.uv,i),c0=base4(d,'conv',i),a0=base4(d,'ats',i),D0=avg4(d.don,i);
+  const uv1=d.uv[i],c1=d.conv[i],a1=d.ats[i],D1=d.don[i];
+  let drv='';WF=null;
+  if(D0&&uv0&&c0&&a0&&D1){
+    const L=Math.log(D1/D0),parts=[Math.log(uv1/uv0),Math.log(c1/c0),Math.log(a1/a0)],dD=D1-D0;
+    const amt=parts.map(p=>L?dD*p/L:0);
+    const drivers=[
+      {n:'Traffic',m:'Visitors',c:chg(uv1,uv0),a:amt[0],det:`${num(uv1)} visitors vs ${num(uv0)} avg`},
+      {n:'Conversion',m:'Orders ÷ visitors',c:chg(c1,c0),a:amt[1],det:`${pct(c1,2)} vs ${pct(c0,2)} avg`},
+      {n:'Ticket size',m:'₹ per order',c:chg(a1,a0),a:amt[2],det:`${rup(a1)} vs ${rup(a0)} avg`}];
+    WF={D0,D1,drivers,col};
+    const big=[...drivers].sort((x,y)=>Math.abs(y.a)-Math.abs(x.a))[0];
+    const up=dD>=0,sameDir=drivers.filter(x=>Math.sign(x.a)===Math.sign(dD));
+    const why={Traffic:up?'more visitors':'fewer visitors',Conversion:up?'better conversion':'weaker conversion','Ticket size':up?'bigger donations per order':'smaller donations per order'};
+    const bigTxt=Math.sign(big.a)===Math.sign(dD)?`Biggest reason: <b>${why[big.n]}</b> (${big.a>=0?'+':'−'}${inr(Math.abs(big.a))}).`:`Mostly driven by ${sameDir.map(x=>why[x.n]).join(' and ')}.`;
+    drv=`<p class="wfhead">Donations are <b class="${up?'upc':'dnc'}">${up?'up':'down'} ${inr(Math.abs(dD))} (${up?'+':'−'}${Math.abs(chg(D1,D0)*100).toFixed(0)}%)</b> vs the 4-week average. ${bigTxt}</p>
+    <div class="chart" id="wf"></div>
+    <div class="wfdet">${drivers.map(x=>`<div><span class="wfn">${x.n}</span><span>${x.det}</span>${chip(x.c,'')}</div>`).join('')}</div>`;
+  }
+  h+=`<section class="panel col"><div class="ph"><div><h3>Donations trend</h3><p>Weekly, excl. tips. Click to jump to a week.</p></div></div>
+   <div class="legend"><span><i style="background:${col}"></i>Weekly</span><span><i class="dash"></i>4-week rolling avg</span></div><div class="chart fill" id="trend"></div>
+   ${(()=>{const past=d.don.slice(Math.max(0,i-51),i+1).filter(v=>v!=null);const srt=[...past].sort((a,b)=>a-b);const med=srt[Math.floor(srt.length/2)];
+     let bi=Math.max(0,i-51);for(let k=bi;k<=i;k++)if(d.don[k]>d.don[bi])bi=k;
+     return `<div class="tstats"><div><span>This week</span><b>${inr(d.don[i])}</b></div><div><span>4-wk avg</span><b>${inr(avg4(d.don,i))}</b></div><div><span>52-wk median</span><b>${inr(med)}</b></div><div><span>Best week</span><b>${inr(d.don[bi])}</b><small>${wkLabel(bi,true)}</small></div></div>`})()}
+  </section>`;
+  // donors vs ticket size
+  {const dc=chg(d.donors[i],avg4(d.donors,i)),tc=chg(d.ats[i],base4(d,'ats',i));
+   const word=c=>c==null?'':Math.abs(c)<0.05?'about the same as':c>0?'more than':'fewer than';
+   const verdict=(dc!=null&&tc!=null)?(Math.abs(dc)<0.05&&Math.abs(tc)<0.05?'Both about normal this week.':
+     (Math.abs(dc)>=Math.abs(tc)?(dc<0?'The drop is mainly <b>fewer donors</b>.':'The lift is mainly <b>more donors</b>.'):(tc<0?'The drop is mainly <b>smaller donations</b>.':'The lift is mainly <b>bigger donations</b>.'))):'';
+   h+=`<section class="panel"><div class="ph"><div><h3>Donors vs ticket size</h3><p>Are we losing people, or are people giving less? Last 12 weeks; the dashed line is the 4-week average. Click a bar to jump to that week.</p></div></div>
+   <p class="wfhead"><b>${num(d.donors[i])}</b> donors ${chip(dc,'vs 4-wk')} gave <b>${rup(d.ats[i])}</b> per donation ${chip(tc,'vs 4-wk')}. ${verdict}</p>
+   <div class="grid2"><div class="mini"><h4>Unique donors <span class="avgk">- - 4-wk avg ${num(avg4(d.donors,i))}</span></h4><div class="chart" id="bDonors"></div></div><div class="mini"><h4>Avg ticket size <span class="avgk">- - 4-wk avg ${rup(base4(d,'ats',i))}</span></h4><div class="chart" id="bTicket"></div></div></div></section>`;}
+  // drivers minis
+  h+=`<section class="panel"><div class="ph"><div><h3>The three drivers, week by week</h3></div></div><div class="grid3">
+   ${[['uv','Unique visitors',num],['conv','Order conversion',v=>pct(v,1)],['ats','Avg ticket size',rup]].map(([k,l,f])=>`<div class="mini"><h4>${l}</h4><div class="mv">${f(d[k][i])} this week · ${f(base4(d,k,i))} 4-wk avg</div><div class="chart" data-mini="${k}"></div></div>`).join('')}</div></section>`;
+  // funnel
+  const steps=[['Started donating','Contribution initiated',d.init[i]],['Cart created','',d.cart[i]],['Order created','',d.ocreated[i]],['Paid','Order placed',d.placed[i]]];
+  const rates=[['f1','Start → cart'],['f2','Cart → order'],['f3','Order → paid']];
+  let fun=`<div class="funnel">`;
+  steps.forEach((st,k)=>{const w=Math.min(100,st[2]/steps[0][2]*100);
+    fun+=`<div class="fstep"><div class="fl">${st[0]}${st[1]?`<small>${st[1]}</small>`:''}</div><div class="fbar"><div style="width:${w}%;background:${col};opacity:${1-k*.18}"></div><span>${FMT.int(st[2])}</span></div></div>`;
+    if(k<3){const r=rates[k];fun+=`<div class="fconv">↓ ${pct(d[r[0]][i],0)} <span style="color:var(--ink-3)">${r[1]}</span> ${chip(chg(d[r[0]][i],base4(d,r[0],i)),'vs 4-wk')}</div>`}});
+  fun+=`</div>`;
+  const over=d.f2[i]>1;
+  h+=`<div class="grid2"><section class="panel"><div class="ph"><div><h3>Checkout funnel</h3><p>Where donors drop off, this week. End-to-end: <b>${pct(d.fAll[i],0)}</b> of people who start end up paying.</p></div></div>${fun}
+   ${over?`<p class="note" style="margin:12px 0 0"><b>Data check:</b> more orders than carts this week (cart → order above 100%). Orders can probably be created without a cart; worth confirming with the data team.</p>`:''}</section>
+  <section class="panel"><div class="ph"><div><h3>Tips</h3><p>Tip revenue is Ketto's own income, separate from donations.</p></div></div>
+   <div class="tipgrid">
+   ${[['Tip revenue',inr(d.tip[i]),chg(d.tip[i],base4(d,'tip',i))],['Orders with a tip',pct(d.tipShare[i],0),chg(d.tipShare[i],base4(d,'tipShare',i))],['Avg tip',rup(d.avgTip[i]),chg(d.avgTip[i],base4(d,'avgTip',i))],['Tip % of donations',pct(d.tipRate[i],1),chg(d.tipRate[i],base4(d,'tipRate',i))]]
+     .map(r=>`<div><div class="eyebrow" style="text-transform:none;letter-spacing:0;font-weight:500;font-size:12px">${r[0]}</div><div style="font-family:var(--display);font-size:22px;font-weight:700">${r[1]}</div>${chip(r[2],'vs 4-wk')}</div>`).join('')}</div>
+   <div class="chart" id="tipc" style="margin-top:14px"></div></section></div>`;
+  // supply
+  const brk=id==='ngnm';
+  h+=`<section class="panel"><div class="ph"><div><h3>Campaign supply</h3><p>How many campaigns are there to donate to, and how much each one earns.</p></div></div>
+   ${brk?`<p class="note" style="margin:0 0 12px"><b>Definition break:</b> campaigns live drops from about 18,500 to about 500 in Jan 2026 and jumps around after that. That points to a change in how live campaigns were counted, not a real collapse. Compare only weeks after the change.</p>`:''}
+   <div class="grid4">${[['live','Campaigns live',FMT.int],['raised','New campaigns raised',FMT.int],['approved','Campaigns approved',FMT.int],['donPerLive','Donations per live campaign',rup]]
+     .map(([k,l,f])=>`<div class="mini"><h4>${l}</h4><div class="mv">${f(d[k][i])} · ${chip(chg(d[k][i],base4(d,k,i)),'vs 4-wk')}</div><div class="chart" data-mini="${k}"></div></div>`).join('')}</div></section>`;
+  // detail table
+  const cols=[];for(let k=Math.max(0,i-7);k<=i;k++)cols.push(k);
+  const TR=[['Traffic'],['views','Campaign views',num],['uv','Unique visitors',num],['vpu','Views per visitor',v=>dec(v)],
+    ['Donations'],['donors','Unique donors',num],['orders','Total orders',num],['don','Donations (excl. tip)',inr],['opd','Orders per donor',v=>dec(v)],['ats','Avg ticket size',rup],['rpu','Revenue per visitor',rup],['conv','Order conversion',v=>pct(v,2)],
+    ['Tips'],['tipOrders','Tipped orders',FMT.int],['tipShare','% orders tipped',v=>pct(v,0)],['tip','Tip amount',inr],['avgTip','Avg tip',rup],
+    ['Funnel'],['init','Contribution initiated',FMT.int],['f1','Start → cart',v=>pct(v,0)],['cart','Cart created',FMT.int],['f2','Cart → order',v=>pct(v,0)],['ocreated','Order created',FMT.int],['f3','Order → paid',v=>pct(v,0)],['placed','Order placed',FMT.int],
+    ['Campaigns'],['live','Campaigns live',FMT.int],['liveDays','Campaign days live',FMT.int],['avgDays','Avg days live',v=>dec(v,1)],['approved','Campaigns approved',FMT.int],['raised','Campaigns raised',FMT.int],['raisedLive','Raised ÷ live',v=>pct(v,1)],['donPerLive','Donations per live campaign',rup]];
+  h+=`<section class="panel"><div class="ph"><div><h3>All metrics · last 8 weeks</h3><p>Every row from the sheet. The selected week is highlighted.</p></div></div><div class="tablewrap"><table><thead><tr><th>Metric</th>${cols.map(k=>`<th class="${k===i?'sel':''}">${wkLabel(k)}</th>`).join('')}<th>4-wk avg</th><th>vs 4-wk</th></tr></thead><tbody>`;
+  TR.forEach(r=>{if(r.length===1){h+=`<tr class="grp"><td colspan="${cols.length+3}">${r[0]}</td></tr>`;return}
+    const [k,l,f]=r;const b=base4(d,k,i);h+=`<tr><td>${l}</td>${cols.map(c=>`<td class="${c===i?'sel':''}">${f(d[k][c])}</td>`).join('')}<td>${f(b)}</td><td>${chip(chg(d[k][i],b),'')}</td></tr>`});
+  h+=`</tbody></table></div></section>`;
+  return {h,after(){
+    barsChart(document.getElementById('bDonors'),{vals:d.donors,sel:i,avg:avg4(d.donors,i),fmt:num,color:col,label:'Unique donors'});
+    barsChart(document.getElementById('bTicket'),{vals:d.ats,sel:i,avg:base4(d,'ats',i),fmt:v=>v>=1e4?inr(v):rup(v),tfmt:rup,color:col,label:'Avg ticket size'});
+    chart(document.getElementById('trend'),{series:[{name:'Donations',vals:d.don,color:col,area:true},{name:'4-wk avg',vals:roll4(d.don),color:cssv('--ink-3'),dash:true,width:1.5}],fmt:inrAx,tfmt:v=>inr(v),height:280,robust:true,sel:i,onPick:pick,label:'Weekly donations'});
+    chart(document.getElementById('tipc'),{series:[{name:'Tip revenue',vals:d.tip,color:col,area:true}],fmt:inrAx,tfmt:v=>inr(v),height:150,sel:i,onPick:pick,compact:true,label:'Weekly tip revenue'});
+    const mf={uv:v=>num(v),conv:v=>pct(v,1),ats:v=>rup(v),live:v=>FMT.int(v),raised:v=>FMT.int(v),approved:v=>FMT.int(v),donPerLive:v=>rup(v)};
+    document.querySelectorAll('[data-mini]').forEach(el=>{const k=el.dataset.mini;
+      chart(el,{series:[{name:el.parentElement.querySelector('h4').textContent,vals:d[k],color:col}],fmt:mf[k],height:140,sel:i,onPick:pick,compact:true,label:k,from:(brk&&k==='live')?Math.max(0,W.findIndex(w=>w>='2026-01-05')):0})});
+  }};
+}
+
+function render(){
+  document.getElementById('wktxt').textContent=wkLabel(sel,true);document.getElementById('prev').disabled=sel===0;document.getElementById('next').disabled=sel===N-1;
+  tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',b.dataset.s===seg));
+  const main=document.getElementById('main');const p=seg==='overview'?overview():segment(seg);
+  main.innerHTML=p.h+`<p class="foot">Source: Supabase table demand_weekly_summary, ${N} weeks from w/c ${wkLabel(0,true)} to w/c ${wkLabel(N-1,true)}. Loaded ${new Date(DATA.fetchedAt||Date.now()).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'})}. Ratios and 4-week averages are calculated from the raw weekly counts.</p>`;
+  const d=seg==='overview'?D.all:D[seg];
+  main.querySelectorAll('[data-spark]').forEach(el=>spark(el,d[el.dataset.spark],sel,el.dataset.color));
+  p.after();
+  main.querySelectorAll('[data-go]').forEach(el=>{el.addEventListener('click',()=>go(el.dataset.go));el.addEventListener('keydown',e=>{if(e.key==='Enter')go(el.dataset.go)})});
+}
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>document.querySelectorAll('.chart,.spark').forEach(el=>el._draw&&el._draw()),120)});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',render);
+new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+render();
+document.getElementById('subline').textContent=`Weekly fundraising demand · 4 segments · ${N} weeks · latest w/c ${wkLabel(N-1,true)}`;
+}
+</script>
+
+</body>
+</html>
