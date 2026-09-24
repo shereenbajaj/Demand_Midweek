@@ -122,6 +122,13 @@ tbody tr.click:hover td{background:var(--surface-2)}
 .mini{min-width:0}
 .avgk{font-weight:400;color:var(--ink-3);font-size:12px;margin-left:8px;white-space:nowrap}
 
+.rightbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.live{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+.ldot{width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
+.live.ok .ldot{background:var(--good);box-shadow:0 0 0 3px var(--good-bg)}
+.refresh{font:inherit;font-weight:500;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;height:34px;padding:0 12px;cursor:pointer}
+.refresh:hover{background:var(--surface-2)}
+.refresh:disabled{opacity:.6;cursor:default}
 .loadmsg{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);color:var(--ink-2);z-index:40}
 .wfhead .chip{vertical-align:1px}
 .wfhead{margin:0 0 6px;font-size:14px;max-width:62ch}
@@ -164,13 +171,14 @@ tbody tr.click:hover td{background:var(--surface-2)}
 <header class="top">
   <div class="toprow">
     <div class="brand"><h1>Demand Midweek Review</h1><p id="subline">Weekly fundraising demand · 4 segments</p></div>
+    <div class="rightbar"><div class="live" id="live"><span class="ldot" aria-hidden="true"></span><span id="livetxt">Connecting to Supabase…</span><button type="button" id="refresh" class="refresh">↻ Refresh</button></div>
     <div class="weekpick">
       <span class="wklab">Week of</span>
       <button id="prev" type="button" aria-label="Previous week">‹</button>
       <div class="wk"><button id="wkbtn" type="button" aria-haspopup="listbox" aria-expanded="false"><span id="wktxt"></span><span class="car" aria-hidden="true">▾</span></button>
         <div class="wkmenu" id="wkmenu" role="listbox" aria-label="Choose week" hidden></div></div>
       <button id="next" type="button" aria-label="Next week">›</button>
-    </div>
+    </div></div>
   </div>
   <nav class="tabs" id="tabs" role="tablist"></nav>
 </header>
@@ -179,12 +187,13 @@ tbody tr.click:hover td{background:var(--surface-2)}
 
 <div id="loading" class="loadmsg">Loading latest data…</div>
 <script>
+document.getElementById('refresh').addEventListener('click',e=>{e.currentTarget.disabled=true;e.currentTarget.textContent='Refreshing…';location.reload()});
 (async function start(){
   const load=document.getElementById('loading');
   try{const r=await fetch('/api/data',{cache:'no-store'});
     if(!r.ok)throw new Error('Server error '+r.status+': '+(await r.text()).slice(0,200));
     const data=await r.json();load.hidden=true;boot(data);}
-  catch(e){load.textContent='Could not load data. '+e.message+' Refresh the page to try again.';}
+  catch(e){load.textContent='Could not load data. '+e.message+' Refresh the page to try again.';document.getElementById('livetxt').textContent='Not connected';}
 })();
 
 function boot(DATA){
@@ -555,7 +564,10 @@ let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>documen
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',render);
 new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 render();
-document.getElementById('subline').textContent=`Weekly fundraising demand · 4 segments · ${N} weeks · latest w/c ${wkLabel(N-1,true)}`;
+{const at=new Date(DATA.fetchedAt||Date.now());
+   document.getElementById('livetxt').textContent=`Live from Supabase · updated ${at.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}`;
+   document.getElementById('live').classList.add('ok');}
+  document.getElementById('subline').textContent=`Weekly fundraising demand · 4 segments · ${N} weeks · latest w/c ${wkLabel(N-1,true)}`;
 }
 </script>
 
